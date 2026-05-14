@@ -172,11 +172,15 @@ namespace WinFormsApp11
             listele();
         }
 
-        // Improve here
         private void btnSearch_Click(object sender, EventArgs e)
         {
             var liste = get_students(connection);
-            var aranan = liste.Where(x => x.Name == txtAd.Text).ToList();
+            var aranan = liste.Where(x => 
+                (string.IsNullOrEmpty(txtAd.Text) || x.Name == txtAd.Text) &&
+                (string.IsNullOrEmpty(txtSoyad.Text) || x.Surname == txtSoyad.Text) &&
+                (string.IsNullOrEmpty(txtEposta.Text) || x.Email == txtEposta.Text) &&
+                (string.IsNullOrEmpty(txtOgrNo.Text) || x.Number == txtOgrNo.Text)
+            ).ToList();
             dataGridView1.DataSource = aranan;
         }
 
