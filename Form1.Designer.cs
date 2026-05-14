@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             groupBox1 = new GroupBox();
+            btnSearch = new Button();
             btnGuncelle = new Button();
             btnSil = new Button();
             btnEkle = new Button();
@@ -41,7 +42,6 @@
             label2 = new Label();
             label1 = new Label();
             dataGridView1 = new DataGridView();
-            btnSearch = new Button();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             SuspendLayout();
@@ -67,6 +67,16 @@
             groupBox1.TabStop = false;
             groupBox1.Text = "groupBox1";
             // 
+            // btnSearch
+            // 
+            btnSearch.Location = new Point(284, 159);
+            btnSearch.Name = "btnSearch";
+            btnSearch.Size = new Size(75, 36);
+            btnSearch.TabIndex = 11;
+            btnSearch.Text = "Ara";
+            btnSearch.UseVisualStyleBackColor = true;
+            btnSearch.Click += btnSearch_Click;
+            // 
             // btnGuncelle
             // 
             btnGuncelle.Location = new Point(284, 117);
@@ -83,7 +93,7 @@
             btnSil.Name = "btnSil";
             btnSil.Size = new Size(76, 35);
             btnSil.TabIndex = 9;
-            btnSil.Text = "button1";
+            btnSil.Text = "sil";
             btnSil.UseVisualStyleBackColor = true;
             btnSil.Click += btnSil_Click;
             // 
@@ -93,7 +103,7 @@
             btnEkle.Name = "btnEkle";
             btnEkle.Size = new Size(76, 36);
             btnEkle.TabIndex = 8;
-            btnEkle.Text = "button1";
+            btnEkle.Text = "ekle";
             btnEkle.UseVisualStyleBackColor = true;
             btnEkle.Click += btnEkle_Click;
             // 
@@ -172,16 +182,6 @@
             dataGridView1.TabIndex = 1;
             dataGridView1.CellClick += dataGridView1_CellClick;
             dataGridView1.CellContentClick += dataGridView1_CellContentClick;
-            // 
-            // btnSearch
-            // 
-            btnSearch.Location = new Point(284, 159);
-            btnSearch.Name = "btnSearch";
-            btnSearch.Size = new Size(75, 36);
-            btnSearch.TabIndex = 11;
-            btnSearch.Text = "Ara";
-            btnSearch.UseVisualStyleBackColor = true;
-            btnSearch.Click += btnSearch_Click;
             // 
             // Form1
             // 

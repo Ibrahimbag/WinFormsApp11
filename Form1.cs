@@ -1,11 +1,13 @@
 using System.Diagnostics;
-using System.Text.Json;
+using Microsoft.Data.Sqlite;
 
 namespace WinFormsApp11
 {
     public partial class Form1 : Form
     {
-        string dosya = "D:\\BP.json";
+        string dosya = "Data Source=D:\\BP.db";
+
+        SqliteConnection connection;
 
         class Student
         {
@@ -16,77 +18,134 @@ namespace WinFormsApp11
             public string Number { get; set; }
         }
 
+        static void create_table(SqliteConnection connection)
+        {
+            const string sql = @"CREATE TABLE IF NOT EXISTS students(
+                Id INTEGER PRIMARY KEY,
+                Name TEXT NOT NULL,
+                Surname TEXT NOT NULL,
+                Email TEXT NOT NULL,
+                Number TEXT NOT NULL
+            )";
+
+            using var command = new SqliteCommand(sql, connection);
+            command.ExecuteNonQuery();
+        }
+
+        static void insert_student(SqliteConnection connection, string name, string surname, string email, string number)
+        {
+            const string sql = @"
+                INSERT INTO students (Name, Surname, Email, Number) 
+                VALUES (@Name, @Surname, @Email, @Number)
+            ";
+
+            using var command = new SqliteCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@Name", name);
+            command.Parameters.AddWithValue("@Surname", surname);
+            command.Parameters.AddWithValue("@Email", email);
+            command.Parameters.AddWithValue("@Number", number);
+
+            command.ExecuteNonQuery();
+        }
+
+        static void update_student(SqliteConnection connection, int id, string name, string surname, string email, string number)
+        {
+            const string sql = @"
+                UPDATE students 
+                SET Name = @Name, Surname = @Surname, Email = @Email, Number = @Number 
+                WHERE id = @id
+            ";
+
+            using var command = new SqliteCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@id", id);
+            command.Parameters.AddWithValue("@Name", name);
+            command.Parameters.AddWithValue("@Surname", surname);
+            command.Parameters.AddWithValue("@Email", email);
+            command.Parameters.AddWithValue("@Number", number);
+
+            command.ExecuteNonQuery();
+        }
+
+        static void delete_student(SqliteConnection connection, int id)
+        {
+            const string sql = @"
+                DELETE FROM students WHERE id = @id
+            ";
+
+            using var command = new SqliteCommand(sql, connection);
+
+            command.Parameters.AddWithValue("@id", id);
+
+            command.ExecuteNonQuery();
+        }
+
+        static List<Student> get_students(SqliteConnection connection)
+        {
+            const string sql = @"
+                SELECT * FROM students
+            ";
+
+            var student_list = new List<Student>();
+
+            using var command = new SqliteCommand(sql, connection);
+
+            using var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                int id = reader.GetInt32(0);
+                string name = reader.GetString(1);
+                string surname = reader.GetString(2);
+                string email = reader.GetString(3);
+                string number = reader.GetString(4);
+
+                student_list.Add(new Student
+                {
+                    Id = id,
+                    Name = name,
+                    Surname = surname,
+                    Email = email,
+                    Number = number
+                });
+            }
+
+            return student_list;
+        }
+
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
         void listele()
         {
-            if (File.Exists(dosya))
-            {
-                var liste = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(dosya));
-                dataGridView1.DataSource = liste;
-            }
-            else
-            {
-
-            }
+            var liste = get_students(connection);
+            dataGridView1.DataSource = liste;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            connection = new SqliteConnection(dosya);
+
+            connection.Open();
+
+            create_table(connection);
+
             listele();
         }
 
         private void btnEkle_Click(object sender, EventArgs e)
         {
-            var liste = new List<Student>();
-            if (File.Exists(dosya))
-            {
-                liste = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(dosya));
-            }
+            insert_student(connection, txtAd.Text, txtSoyad.Text, txtEposta.Text, txtOgrNo.Text);
 
-            Student std = new Student();
-
-            if (liste.Count > 0)
-            {
-                std.Id = File.Exists(dosya)
-                    ? liste.Max(x => x.Id) + 1
-                    : 1;
-            }
-            else
-            {
-                std.Id = 1;
-            }
-
-            std.Name = txtAd.Text;
-            std.Surname = txtSoyad.Text;
-            std.Email = txtEposta.Text;
-            std.Number = txtOgrNo.Text;
-            liste.Add(std);
-
-            File.WriteAllText(dosya, JsonSerializer.Serialize(liste));
             listele();
 
             txtAd.Clear();
             txtSoyad.Clear();
             txtEposta.Clear();
             txtOgrNo.Clear();
-        }
-
-        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
         }
 
         private int secilenId;
@@ -101,38 +160,39 @@ namespace WinFormsApp11
         }
         private void btnSil_Click(object sender, EventArgs e)
         {
-            var liste = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(dosya));
-
-            var yeniListe = liste.Where(x => x.Id != secilenId).ToList();
-
-            File.WriteAllText(dosya, JsonSerializer.Serialize(yeniListe));
-
-            Debug.WriteLine("Silindi: " + secilenId);
+            delete_student(connection, secilenId);
 
             listele();
         }
 
         private void btnGuncelle_Click(object sender, EventArgs e)
         {
-            var liste = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(dosya));
-
-            var secilenOgr = liste.FirstOrDefault(x => x.Id == secilenId);
-
-            secilenOgr.Name = txtAd.Text;
-            secilenOgr.Surname = txtSoyad.Text;
-            secilenOgr.Email = txtEposta.Text;
-            secilenOgr.Number = txtOgrNo.Text;
-
-            File.WriteAllText(dosya, JsonSerializer.Serialize(liste));
+            update_student(connection, secilenId, txtAd.Text, txtSoyad.Text, txtEposta.Text, txtOgrNo.Text);
 
             listele();
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            var liste = JsonSerializer.Deserialize<List<Student>>(File.ReadAllText(dosya));
+            var liste = get_students(connection);
             var aranan = liste.Where(x => x.Name == txtAd.Text).ToList();
             dataGridView1.DataSource = aranan;
         }
+
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+        }
+
     }
 }
