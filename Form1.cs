@@ -172,6 +172,7 @@ namespace WinFormsApp11
             listele();
         }
 
+        // Improve here
         private void btnSearch_Click(object sender, EventArgs e)
         {
             var liste = get_students(connection);
@@ -179,7 +180,7 @@ namespace WinFormsApp11
             dataGridView1.DataSource = aranan;
         }
 
-
+        // REMOVE THE REFERENCES LATER
         private void label1_Click(object sender, EventArgs e)
         {
 
